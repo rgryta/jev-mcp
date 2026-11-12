@@ -1,0 +1,28 @@
+# An example, not a deployment. Put TYPESAFE_API_KEY in `.env` beside it.
+services:
+  jev-mcp:
+    image: ghcr.io/rgryta/jev-mcp:latest
+    container_name: jev-mcp
+    restart: unless-stopped
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    env_file:
+      - .env
+    environment:
+      JEV_MCP_HOST: 0.0.0.0
+      JEV_MCP_PORT: "8000"
+      # The Host headers /mcp answers (rmcp's DNS-rebinding guard). Unset means loopback
+      # only: every call then gets a 403 while /healthz stays green.
+      JEV_MCP_ALLOWED_HOSTS: jev-mcp
+    healthcheck:
+      test: [CMD, jev-mcp, --health-check]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: 64M
